@@ -15,4 +15,8 @@ public class Tuple {
 		int y = (int) (Math.random() * bound);
 		return new Tuple(x, y);
 	}
+
+	public int compareTo(Tuple t) {
+		return Math.abs(this.x - t.x) + Math.abs(this.y - t.y);
+	}
 } 

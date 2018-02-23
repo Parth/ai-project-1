@@ -2,16 +2,16 @@ public class Player {
 	private Tuple origin;
 	private Tuple destination;
 
-	private Sharable shar;
+	private Sharable share;
 
 	public Player(Tuple origin, Tuple destination, Sharable share) {
 		this.origin = origin;
 		this.destination = origin;
-		this.shar = share;
+		this.share = share;
 	}
 
 
-	public char[][] step() {
+	public Cell[][] step() {
 		return null;
 	}
 

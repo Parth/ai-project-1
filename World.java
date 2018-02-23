@@ -1,14 +1,14 @@
 public class World implements Sharable {
 	
-	private char[][] world;
+	private Cell[][] world;
 
 	public World(int bound) {
 		
 	}
 
 	@Override 
-	public char getState(int x, int y) {
-		return world[x][y];
+	public Cell getState(Tuple t) {
+		return null;
 	}
 
 	public static void main(String[] args) {
@@ -26,7 +26,7 @@ public class World implements Sharable {
 		}
 	}
 
-	public static void print(char[][] c) {
+	public static void print(Cell[][] c) {
 
 	}
 }
