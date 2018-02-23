@@ -8,7 +8,7 @@ public class Cell {
 		hCost = location.compareTo(destination);
 		this.gCost = gCost;
 
-		fCost = hCost + gCost;
+		fCost = (gCost == Integer.MAX_VALUE) ? Integer.MAX_VALUE : hCost + gCost;
 	}
 
 	public void setGCost(int gCost) {
