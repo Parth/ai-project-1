@@ -1,11 +1,18 @@
 /**
  * https://stackoverflow.com/questions/2670982/using-pairs-or-2-tuples-in-java
  */
-public class Tuple<X, Y> { 
-  public final X x; 
-  public final Y y; 
-  public Tuple(X x, Y y) { 
-    this.x = x; 
-    this.y = y; 
-  } 
+public class Tuple { 
+	public int x; 
+	public int y; 
+
+	public Tuple(int x, int y) { 
+		this.x = x; 
+		this.y = y; 
+	} 
+
+	public static Tuple generateRandomTuple(int bound) {
+		int x = (int) (Math.random() * bound);
+		int y = (int) (Math.random() * bound);
+		return new Tuple(x, y);
+	}
 } 

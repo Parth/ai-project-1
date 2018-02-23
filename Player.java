@@ -1,10 +1,10 @@
 public class Player {
-	private Tuple<Integer, Integer> origin;
-	private Tuple<Integer, Integer> destination;
+	private Tuple origin;
+	private Tuple destination;
 
 	private Sharable shar;
 
-	public Player(Tuple<Integer, Integer> origin, Tuple<Integer, Integer> destination, Sharable share) {
+	public Player(Tuple origin, Tuple destination, Sharable share) {
 		this.origin = origin;
 		this.destination = origin;
 		this.shar = share;
@@ -12,7 +12,7 @@ public class Player {
 
 
 	public char[][] step() {
-
+		return null;
 	}
 
 	public boolean reached() {

@@ -2,8 +2,8 @@ public class World implements Sharable {
 	
 	private char[][] world;
 
-	public World() {
-		// Generate world here
+	public World(int bound) {
+		
 	}
 
 	@Override 
@@ -12,13 +12,18 @@ public class World implements Sharable {
 	}
 
 	public static void main(String[] args) {
-		World w = new World();
-		// Random origin and dest
+
+		int bound = Integer.parseInt(args[0]);
+
+		World w = new World(bound);
+
+		Tuple origin = Tuple.generateRandomTuple(bound);
+		Tuple destination = Tuple.generateRandomTuple(bound);
 		
-		Player p = new Player(origin, destination, this);
+		Player p = new Player(origin, destination, w);
 
 		while (!p.reached()) {
-			print(p.ste());
+			print(p.step());
 		}
 	}
 
