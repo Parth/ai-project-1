@@ -12,7 +12,6 @@ public class World implements Sharable {
 	}
 
 	public static void main(String[] args) {
-
 		int bound = Integer.parseInt(args[0]);
 
 		World w = new World(bound);

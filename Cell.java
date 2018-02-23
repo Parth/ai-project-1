@@ -2,23 +2,12 @@ public Cell {
 	Tuple location;
 	int fCost;
 	int gCost;
+	int hCost;
 
 	public Cell(Tuple location, Tuple destination, int gCost) {
+		hCost = location.compareTo(destination);
+		this.gCost = gCost;
 
-	}
-
-	public int getHCost(Cell c) {
-	}
-
-	public int getGCost() {
-
-	}
-
-	public void setGCost(int g) {
-
-	}
-
-	public int getFCost(Cell c) {
-		return getHCost
+		fCost = hCost + gCost;
 	}
 }
