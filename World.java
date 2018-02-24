@@ -1,10 +1,13 @@
 public class World implements Sharable {
 	
 	private Cell[][] world;
+	private int bound;
 
 	public World(int bound, Tuple destination) {
 		
 		world = new Cell[bound][bound];
+
+		this.bound = bound;
 
 		for (int r = 0; r < bound; r++) {
 			for (int c = 0; c < bound; c++) {
@@ -20,6 +23,11 @@ public class World implements Sharable {
 	@Override 
 	public Cell getState(Tuple t) {
 		return world[t.y][t.x];
+	}
+
+	@Override
+	public int getBounds() {
+		return bound;
 	}
 
 	public static void main(String[] args) {

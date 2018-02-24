@@ -1,5 +1,6 @@
 public class Cell {
 	Tuple location;
+	Cell searchTreeParent;
 	int fCost;
 	int gCost;
 	int hCost;
@@ -9,6 +10,12 @@ public class Cell {
 		this.gCost = gCost;
 
 		fCost = (gCost == Integer.MAX_VALUE) ? Integer.MAX_VALUE : hCost + gCost;
+
+		searchTreeParent = null;
+	}
+
+	public void setSearchTreeParent(Cell c) {
+		searchTreeParent = c;
 	}
 
 	public void setGCost(int gCost) {
