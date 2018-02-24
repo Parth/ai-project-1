@@ -44,8 +44,12 @@ public class World implements Sharable {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		int bound = Integer.parseInt(args[0]);
-		//bound = 101;
+		int bound = 0;
+		if (args.length < 1) {
+			bound = 101;
+		} else {
+			bound = Integer.parseInt(args[0]);
+		}
 
 		World w = new World(bound);
 
@@ -60,12 +64,18 @@ public class World implements Sharable {
 
 		while (!p.reached()) {
 			print(p.step());
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		}
 	}
 
 	public static void print(Cell[][] cells) {
+		System.out.print("  ");
+		for (int c = 0; c<cells[0].length; c++) { 
+			System.out.print(c+" ");
+		}
+		System.out.println();
 		for (int r = 0; r < cells.length; r++) {
+			System.out.print(r+" ");
 			for (int c = 0; c < cells[r].length; c++) {
 				System.out.print(cells[r][c].toString() + ",");
 			}

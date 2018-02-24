@@ -1,4 +1,4 @@
-public class Cell {
+public class Cell implements Comparable<Cell> {
 	Tuple location;
 	Cell searchTreeParent;
 	int fCost;
@@ -32,5 +32,21 @@ public class Cell {
 		} else {
 			return "" + gCost;
 		}	
+	}
+
+	@Override
+	public int compareTo(Cell other) {
+		return this.fCost - other.fCost;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Cell) {
+			Cell c = (Cell) o;
+			if (this.location.equals(c.location)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.PriorityQueue;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 
 public class Player {
@@ -15,6 +16,8 @@ public class Player {
 	public Cell[][] playerWorld;
 
 	private Stack<Cell> path;
+
+	private List<Tuple> moveHistory;
 
 	private int counter = 0;
 	public int bound;
@@ -32,6 +35,8 @@ public class Player {
 		search = new int[bound][bound];
 		playerWorld = new Cell[bound][bound];
 
+		moveHistory = new LinkedList<>();
+
 		path = null;
 
 		for (int r = 0; r < bound; r++) {
@@ -39,7 +44,7 @@ public class Player {
 				if ( this.origin.x == r && this.origin.y == c ) {
 					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, 0);
 				} else if ( this.destination.x == r && this.destination.y == c ) {
-					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, origin.compareTo(destination));
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, Integer.MAX_VALUE);
 				} else {
 					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, -1);
 				}
@@ -54,38 +59,50 @@ public class Player {
 			Tuple neighborTuple = new Tuple(origin.x + t.x, origin.y + t.y);
 			if (neighborTuple.x >= 0 && neighborTuple.y >= 0 && neighborTuple.x < bound && neighborTuple.y < bound) {
 				Cell neighborCellWorld = share.getState(neighborTuple);
-				Cell neighborCell = playerWorld[neighborTuple.x][neighborTuple.y];
-				neighborCell.setGCost(neighborCellWorld.gCost);
-				System.out.println("test: "+neighborCell.location);
-				playerWorld[neighborTuple.x][neighborTuple.y] = neighborCell;
+				if (neighborCellWorld.gCost == Integer.MAX_VALUE) {
+					Cell neighborCell = playerWorld[neighborTuple.x][neighborTuple.y];
+					neighborCell.setGCost(neighborCellWorld.gCost);
+					playerWorld[neighborTuple.x][neighborTuple.y] = neighborCell;
+				}
 			}
 		}
 
 		boolean newPath = false;
 			
 		if (path != null) {
-			
-			// if a path was computed, follow it
-			Cell newCell = path.pop();
-			origin = newCell.location;
-
-			// detect if the player reached the destination
-			if (origin.equals(destination)) {
-				reached = true;
-				return playerWorld;
-			}
-
 			// detect if the path cost increased
 			Stack<Cell> pathCopy = (Stack<Cell>)path.clone();
 			while (!pathCopy.isEmpty()) {
 				Cell pathCell = pathCopy.pop();
 				Cell playerWorldCell = playerWorld[pathCell.location.x][pathCell.location.y];
 
-				if (playerWorldCell.gCost == Integer.MAX_VALUE) {
+				if (!playerWorldCell.location.equals(destination) && playerWorldCell.gCost == Integer.MAX_VALUE) {
+					System.out.println("increase in path cost");
 					//one of the cells on the previously computed path is now seen to be blocked.
 					newPath = true;
 					break;
 				}
+			}
+			
+			if (!newPath) {
+				// if a path was computed, follow it
+				Cell newCell = path.pop();
+				origin = newCell.location;
+				System.out.println("moved to: "+origin);
+				moveHistory.add(newCell.location);
+
+				// detect if the player reached the destination
+				if (origin.equals(destination)) {
+					reached = true;
+					System.out.println("reached target");
+					System.out.print("move history: ");
+					for (Tuple move : moveHistory) {
+						System.out.print(move+" -> ");
+					}
+					System.out.println();
+					return playerWorld;
+				}
+				return playerWorld;
 			}
 		} else {
 			newPath = true;
@@ -93,17 +110,21 @@ public class Player {
 
 		if (newPath) {
 
+			System.out.println("calculating new path");
+
 			// path cost increased (detected a blockage along path), compute a new path
 			counter++;
 
 			// create start state
 			Cell startCell = share.getState(origin);
 			startCell.setGCost(0);
+			playerWorld[origin.x][origin.y] = startCell;
 			search[origin.x][origin.y] = counter;
 
 			// create goal state
 			Cell goalCell = share.getState(destination);
 			goalCell.setGCost(Integer.MAX_VALUE);
+			playerWorld[destination.x][destination.y] = goalCell;
 			search[destination.x][destination.y] = counter;
 
 			Queue<Cell> open = new PriorityQueue<>();
@@ -112,7 +133,7 @@ public class Player {
 			open.add(startCell);
 			
 			// A* search
-			while (goalCell.gCost > open.peek().fCost) {
+			while (((Cell)this.playerWorld[destination.x][destination.y]).gCost > open.peek().fCost) {
 				Cell c = open.poll();
 				closed.add(c);
 
@@ -131,18 +152,29 @@ public class Player {
 				}
 			}
 
+			if (open.size() == 0) {
+				//cant reach target
+				System.out.println("cant reach target");
+				reached = true;
+				return playerWorld;
+			}
+
+			System.out.println("open: "+open.size());
+
 			path = new Stack<>();
-			Cell iter = goalCell;
-			while (!iter.equals(null)) {
+			Cell iter = this.playerWorld[destination.x][destination.y];
+			while (iter != null) {
 				path.push(iter);
 				iter = iter.searchTreeParent;
 			}
 
-			if (open.size() == 0) {
-				//cant reach target
-				reached = true;
-				return null;
+			Stack<Cell> pathCopy = (Stack<Cell>)path.clone();
+			System.out.print("new path: ");
+			while(!pathCopy.isEmpty()) {
+				Cell c = pathCopy.pop();
+				System.out.print(c.location+", ");
 			}
+			System.out.println();
 		}
 
 		return playerWorld;
@@ -153,10 +185,14 @@ public class Player {
 		List<Cell> successors = new ArrayList<>();
 		Tuple[] d = new Tuple[] {new Tuple(-1, 0), new Tuple(1, 0), new Tuple(0, 1), new Tuple(0, -1)};
 		for (Tuple t : d) {
-			Tuple neighborTuple = new Tuple(origin.x + t.x, origin.y + t.y);
+			Tuple neighborTuple = new Tuple(s.location.x + t.x, s.location.y + t.y);
 			if (neighborTuple.x >= 0 && neighborTuple.y >= 0 && neighborTuple.x < bound && neighborTuple.y < bound) {
 				Cell neighborCell = playerWorld[neighborTuple.x][neighborTuple.y];
-				if (neighborCell.gCost < Integer.MAX_VALUE) {
+				if (neighborCell.gCost == Integer.MAX_VALUE) {
+					if (neighborCell.location.equals(destination)) {
+						successors.add(neighborCell);
+					}
+				} else {
 					successors.add(neighborCell);
 				}
 			}
@@ -166,7 +202,6 @@ public class Player {
 	}
 
 	private int search(Tuple s) {
-		System.out.println(s);
 		return search[s.x][s.y];
 	}
 
