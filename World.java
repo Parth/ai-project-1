@@ -3,15 +3,28 @@ public class World implements Sharable {
 	private Cell[][] world;
 	private int bound;
 
-	public World(int bound, Tuple destination) {
-		
+	public Tuple origin;
+	public Tuple destination;
+
+	public World(int bound) {
 		world = new Cell[bound][bound];
+
+		origin = Tuple.generateRandomTuple(bound);
+		destination = Tuple.generateRandomTuple(bound);
+		while (origin.equals(destination)) {
+			destination = Tuple.generateRandomTuple(bound);
+		}
 
 		this.bound = bound;
 
 		for (int r = 0; r < bound; r++) {
 			for (int c = 0; c < bound; c++) {
-				world[r][c] = new Cell(new Tuple(c, r), destination, (Math.random() < 0.3) ? Integer.MAX_VALUE : -1);
+				if ( (origin.x == r && origin.y == c) || (destination.x == r && destination.y == c) ) {
+					// ensure that origin and destination are unblocked
+					world[r][c] = new Cell(new Tuple(r, c), destination, 0);
+				} else {
+					world[r][c] = new Cell(new Tuple(r, c), destination, (Math.random() < 0.3) ? Integer.MAX_VALUE : 0);
+				}
 			}
 		}
 	}
@@ -22,7 +35,7 @@ public class World implements Sharable {
 
 	@Override 
 	public Cell getState(Tuple t) {
-		return world[t.y][t.x];
+		return world[t.x][t.y];
 	}
 
 	@Override
@@ -30,30 +43,34 @@ public class World implements Sharable {
 		return bound;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		int bound = Integer.parseInt(args[0]);
-		bound = 101;
+		//bound = 101;
 
-		Tuple origin = Tuple.generateRandomTuple(bound);
-		Tuple destination = Tuple.generateRandomTuple(bound);
+		World w = new World(bound);
 
-		World w = new World(bound, destination);
+		System.out.println(w.origin);
+		System.out.println(w.destination);
 
 		print(w.getWorld());
 		
-		Player p = new Player(origin, destination, w);
+		Player p = new Player(w.origin, w.destination, w);
+
+		print(p.playerWorld);
 
 		while (!p.reached()) {
-			//print(p.step());
+			print(p.step());
+			Thread.sleep(1000);
 		}
 	}
 
 	public static void print(Cell[][] cells) {
 		for (int r = 0; r < cells.length; r++) {
-			for (int c = 0; c < cells[0].length; c++) {
+			for (int c = 0; c < cells[r].length; c++) {
 				System.out.print(cells[r][c].toString() + ",");
 			}
 			System.out.println();
 		}
+		System.out.println();
 	}
 }

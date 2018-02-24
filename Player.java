@@ -12,7 +12,7 @@ public class Player {
 	private Tuple destination;
 
 	private int[][] search;
-	private Cell[][] playerWorld;
+	public Cell[][] playerWorld;
 
 	private Stack<Cell> path;
 
@@ -24,37 +24,46 @@ public class Player {
 
 	public Player(Tuple origin, Tuple destination, Sharable share) {
 		this.origin = origin;
-		this.destination = origin;
+		this.destination = destination;
 		this.share = share;
+
+		bound = share.getBounds();
 
 		search = new int[bound][bound];
 		playerWorld = new Cell[bound][bound];
 
 		path = null;
 
-		bound = share.getBounds();
-
-		for (int x = 0; x < bound; x++) {
-			for (int y = 0; y < bound; y++) {
-				playerWorld[x][y] = new Cell(origin, destination, Integer.MAX_VALUE);
+		for (int r = 0; r < bound; r++) {
+			for (int c = 0; c < bound; c++) {
+				if ( this.origin.x == r && this.origin.y == c ) {
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, 0);
+				} else if ( this.destination.x == r && this.destination.y == c ) {
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, origin.compareTo(destination));
+				} else {
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, -1);
+				}
 			}
 		}
 	}
 
 	public Cell[][] step() {
 		// give the player visibility of the 4 tiles around it from the world
-		int[] d = new int[] {-1, 1};
-		for (int x : d) {
-			for (int y : d) {
-				Tuple neighborTuple = new Tuple(origin.x + x, origin.y + y);
-				if (neighborTuple.x >= 0 && neighborTuple.y >= 0 && neighborTuple.x < bound && neighborTuple.y < bound) {
-					Cell neighborCell = share.getState(neighborTuple);
-					playerWorld[neighborTuple.x][neighborTuple.y] = neighborCell;
-				}
+		Tuple[] d = new Tuple[] {new Tuple(-1, 0), new Tuple(1, 0), new Tuple(0, 1), new Tuple(0, -1)};
+		for (Tuple t : d) {
+			Tuple neighborTuple = new Tuple(origin.x + t.x, origin.y + t.y);
+			if (neighborTuple.x >= 0 && neighborTuple.y >= 0 && neighborTuple.x < bound && neighborTuple.y < bound) {
+				Cell neighborCellWorld = share.getState(neighborTuple);
+				Cell neighborCell = playerWorld[neighborTuple.x][neighborTuple.y];
+				neighborCell.setGCost(neighborCellWorld.gCost);
+				System.out.println("test: "+neighborCell.location);
+				playerWorld[neighborTuple.x][neighborTuple.y] = neighborCell;
 			}
 		}
+
+		boolean newPath = false;
 			
-		if (!(path.equals(null) || path.isEmpty())) {
+		if (path != null) {
 			
 			// if a path was computed, follow it
 			Cell newCell = path.pop();
@@ -65,25 +74,26 @@ public class Player {
 				reached = true;
 				return playerWorld;
 			}
-		}
 
-		// detect if the path cost increased
-		Stack<Cell> pathCopy = (Stack<Cell>)path.clone();
-		boolean newPath = false;
-		while (!pathCopy.isEmpty()) {
-			Cell pathCell = pathCopy.pop();
-			Cell playerWorldCell = playerWorld[pathCell.location.x][pathCell.location.y];
+			// detect if the path cost increased
+			Stack<Cell> pathCopy = (Stack<Cell>)path.clone();
+			while (!pathCopy.isEmpty()) {
+				Cell pathCell = pathCopy.pop();
+				Cell playerWorldCell = playerWorld[pathCell.location.x][pathCell.location.y];
 
-			if (playerWorldCell.gCost == Integer.MAX_VALUE) {
-				//one of the cells on the previously computed path is now seen to be blocked.
-				newPath = true;
-				break;
+				if (playerWorldCell.gCost == Integer.MAX_VALUE) {
+					//one of the cells on the previously computed path is now seen to be blocked.
+					newPath = true;
+					break;
+				}
 			}
+		} else {
+			newPath = true;
 		}
 
 		if (newPath) {
 
-			//otherwise, compute a new path
+			// path cost increased (detected a blockage along path), compute a new path
 			counter++;
 
 			// create start state
@@ -141,15 +151,13 @@ public class Player {
 	// return a list of cells that can be traveled to based on available actions at Cell s
 	private List<Cell> A(Cell s) {
 		List<Cell> successors = new ArrayList<>();
-		int[] d = new int[] {-1, 1};
-		for (int x : d) {
-			for (int y : d) {
-				Tuple neighborTuple = new Tuple(origin.x + x, origin.y + y);
-				if (neighborTuple.x >= 0 && neighborTuple.y >= 0 && neighborTuple.x < bound && neighborTuple.y < bound) {
-					Cell neighborCell = playerWorld[neighborTuple.x][neighborTuple.y];
-					if (neighborCell.gCost < Integer.MAX_VALUE) {
-						successors.add(neighborCell);
-					}
+		Tuple[] d = new Tuple[] {new Tuple(-1, 0), new Tuple(1, 0), new Tuple(0, 1), new Tuple(0, -1)};
+		for (Tuple t : d) {
+			Tuple neighborTuple = new Tuple(origin.x + t.x, origin.y + t.y);
+			if (neighborTuple.x >= 0 && neighborTuple.y >= 0 && neighborTuple.x < bound && neighborTuple.y < bound) {
+				Cell neighborCell = playerWorld[neighborTuple.x][neighborTuple.y];
+				if (neighborCell.gCost < Integer.MAX_VALUE) {
+					successors.add(neighborCell);
 				}
 			}
 		}
@@ -158,6 +166,7 @@ public class Player {
 	}
 
 	private int search(Tuple s) {
+		System.out.println(s);
 		return search[s.x][s.y];
 	}
 

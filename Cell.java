@@ -6,6 +6,7 @@ public class Cell {
 	int hCost;
 
 	public Cell(Tuple location, Tuple destination, int gCost) {
+		this.location = location;
 		hCost = location.compareTo(destination);
 		this.gCost = gCost;
 
@@ -24,12 +25,12 @@ public class Cell {
 	}
 
 	public String toString() {
-		if (fCost == -1) {
+		if (gCost == -1) {
 			return "U";
-		} else if (fCost == Integer.MAX_VALUE) {
+		} else if (gCost == Integer.MAX_VALUE) {
 			return "B";
 		} else {
-			return "" + fCost;
+			return "" + gCost;
 		}	
 	}
 }
