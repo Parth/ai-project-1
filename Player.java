@@ -144,6 +144,7 @@ public class Player {
 				// tie-breaking
 
 				List<Cell> tie = new LinkedList<>();
+				tie.add(first);
 				while(open.size() >=1 && open.peek().fCost == first.fCost) {
 					tie.add(open.poll());
 				}
@@ -164,17 +165,21 @@ public class Player {
 					}
 				}
 
-				for (Cell t : tie) {
-					if (!t.equals(maxGCostCell)) {
-						open.add(t);
-					}
-				}
-
 				// use max g cost
 				//Cell cell = maxGCostCell;
 
 				// use min g cost
-				Cell cell = minGCostCell;
+				//Cell cell = minGCostCell;
+
+				// use arbitrary
+				Cell cell = first;
+
+				// put cells not used back into open queue
+				for (Cell t : tie) {
+					if (!t.equals(cell)) {
+						open.add(t);
+					}
+				}
 
 				// end tie-breaking
 

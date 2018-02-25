@@ -94,8 +94,11 @@ public class World implements Sharable {
 		double percentageSuccessfulSearches = (numSuccessfulSearches*1.0)/(numExperiments*1.0);
 
 		System.out.println(numExperiments+" experiments with grid size "+bound);
-		System.out.println("Average nodes generated per A* search: "+avgNodesGeneratedSearch);
+		System.out.println("Total runtime: "+totalRuntime);
+		System.out.println("Total nodes generated: "+numTotalNodesGenerated);
+		System.out.println("Total number of searches: "+numSearches);
 		System.out.println("Average nodes generated per experiment: "+avgNodesGeneratedExperiments);
+		System.out.println("Average nodes generated per A* search: "+avgNodesGeneratedSearch);
 		System.out.println("Average runtime per experiment: "+avgRuntimeExperiments+" ms");
 		System.out.println("Percentage of successful searches: "+percentageSuccessfulSearches);
 	}
