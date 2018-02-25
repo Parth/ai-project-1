@@ -5,9 +5,14 @@ public class Cell implements Comparable<Cell> {
 	int gCost;
 	int hCost;
 
-	public Cell(Tuple location, Tuple destination, int gCost) {
+	public Cell(Tuple location, Tuple origin, Tuple destination, int gCost, boolean forward) {
 		this.location = location;
-		hCost = location.compareTo(destination);
+		if (forward) {
+			hCost = location.compareTo(destination);
+		} else {
+			hCost = location.compareTo(origin);
+		}
+		
 		this.gCost = gCost;
 
 		fCost = (gCost == Integer.MAX_VALUE) ? Integer.MAX_VALUE : hCost + gCost;

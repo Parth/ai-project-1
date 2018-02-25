@@ -39,6 +39,8 @@ public class World implements Sharable {
 
 	public static void main(String[] args) throws InterruptedException {
 		int bound = 101;
+		boolean forward = true;
+
 		int numExperiments = 50;
 		if (args.length >= 1) {
 			bound = Integer.parseInt(args[0]);
@@ -59,7 +61,7 @@ public class World implements Sharable {
 
 			print(w.getWorld());
 			
-			Player p = new Player(w.origin, w.destination, w);
+			Player p = new Player(w.origin, w.destination, w, forward);
 
 			print(p.playerWorld);
 
@@ -125,7 +127,7 @@ public class World implements Sharable {
 		
 		visited[origin.x][origin.y] = true;
 
-		world[origin.x][origin.y] = new Cell(origin, destination, 0);	//set as unblocked
+		world[origin.x][origin.y] = new Cell(origin, origin, destination, 0, true);	//set as unblocked
 		stack.push(origin);
 		
 		while (true) {	// will break if all cells are visited
@@ -138,9 +140,9 @@ public class World implements Sharable {
 					
 					if ( (origin.x == next.x && origin.y == next.y) || (destination.x == next.x && destination.y == next.y) ) {
 						// ensure that origin and destination are unblocked
-						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), destination, 0);
+						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), origin, destination, 0, true);
 					} else {
-						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), destination, (Math.random() < 0.3) ? Integer.MAX_VALUE : 0);
+						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), origin, destination, (Math.random() < 0.3) ? Integer.MAX_VALUE : 0, true);
 					}
 					if (world[next.x][next.y].gCost == 0) {	//if unblocked
 						stack.push(next);
@@ -154,7 +156,7 @@ public class World implements Sharable {
 				break;
 			}
 			visited[next.x][next.y] = true;
-			world[next.x][next.y] = new Cell(next, destination, 0);	//set as unblocked
+			world[next.x][next.y] = new Cell(next, origin, destination, 0, true);	//set as unblocked
 			stack.push(next);
 			
 		}

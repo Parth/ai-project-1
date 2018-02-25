@@ -11,6 +11,7 @@ import java.util.LinkedList;
 public class Player {
 	private Tuple origin;
 	private Tuple destination;
+	private boolean forward;
 
 	private int[][] search;
 	public Cell[][] playerWorld;
@@ -29,10 +30,11 @@ public class Player {
 	public int nodesGenerated;
 	public boolean reachedTarget;
 
-	public Player(Tuple origin, Tuple destination, Sharable share) {
+	public Player(Tuple origin, Tuple destination, Sharable share, boolean forward) {
 		this.origin = origin;
 		this.destination = destination;
 		this.share = share;
+		this.forward = forward;
 
 		bound = share.getBounds();
 
@@ -46,11 +48,11 @@ public class Player {
 		for (int r = 0; r < bound; r++) {
 			for (int c = 0; c < bound; c++) {
 				if ( this.origin.x == r && this.origin.y == c ) {
-					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, 0);
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.origin, this.destination, 0, this.forward);
 				} else if ( this.destination.x == r && this.destination.y == c ) {
-					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, Integer.MAX_VALUE);
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.origin, this.destination, Integer.MAX_VALUE, this.forward);
 				} else {
-					playerWorld[r][c] = new Cell(new Tuple(r, c), this.destination, -1);
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.origin, this.destination, -1, this.forward);
 				}
 			}
 		}
@@ -166,13 +168,13 @@ public class Player {
 				}
 
 				// use max g cost
-				//Cell cell = maxGCostCell;
+				Cell cell = maxGCostCell;
 
 				// use min g cost
 				//Cell cell = minGCostCell;
 
 				// use arbitrary
-				Cell cell = first;
+				//Cell cell = first;
 
 				// put cells not used back into open queue
 				for (Cell t : tie) {
