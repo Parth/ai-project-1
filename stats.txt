@@ -9,6 +9,16 @@ Average nodes generated per A* search: 898.9789251844046
 Average runtime per experiment: 74.64 ms
 Percentage of successful searches: 0.98
 
+Lower g-cost tie breaking forward search
+----------------------------------------
+50 experiments with grid size 101
+Total runtime: 2198.0
+Total nodes generated: 1736550
+Total number of searches: 1573
+Average nodes generated per experiment: 34731.0
+Average nodes generated per A* search: 1103.973299427845
+Average runtime per experiment: 43.96 ms
+Percentage of successful searches: 0.94
 
 
 Higher g-cost tie breaking forward search
@@ -23,16 +33,22 @@ Average runtime per experiment: 13.24 ms
 Percentage of successful searches: 0.96
 
 
+Backwards search, tie breaking with higher g-cost
+-------------------------------------------------
+50 experiments with grid size 101 running backward
+Total runtime: 3959.0
+Total nodes generated: 2356479
+Total number of searches: 1656
+Average nodes generated per experiment: 47129.58
+Average nodes generated per A* search: 1422.9945652173913
+Average runtime per experiment: 79.18 ms
+Percentage of successful searches: 0.92
 
-Lower g-cost tie breaking forward search
-----------------------------------------
-50 experiments with grid size 101
-Total runtime: 2198.0
-Total nodes generated: 1736550
-Total number of searches: 1573
-Average nodes generated per experiment: 34731.0
-Average nodes generated per A* search: 1103.973299427845
-Average runtime per experiment: 43.96 ms
-Percentage of successful searches: 0.94
-
-
+50 experiments with grid size 101 running backward
+Total runtime: 5348.0
+Total nodes generated: 2877840
+Total number of searches: 1730
+Average nodes generated per experiment: 57556.8
+Average nodes generated per A* search: 1663.4913294797689
+Average runtime per experiment: 106.96 ms
+Percentage of successful searches: 0.96

@@ -9,7 +9,7 @@ public class World implements Sharable {
 	public Tuple origin;
 	public Tuple destination;
 
-	public World(int bound) {
+	public World(int bound, boolean forward) {
 		world = new Cell[bound][bound];
 
 		origin = Tuple.generateRandomTuple(bound);
@@ -20,7 +20,7 @@ public class World implements Sharable {
 
 		this.bound = bound;
 
-		populateWorld();
+		populateWorld(forward);
 	}
 
 	public Cell[][] getWorld() {
@@ -37,9 +37,85 @@ public class World implements Sharable {
 		return bound;
 	}
 
+	// DFS
+	private void populateWorld(boolean forward) {
+		Stack<Tuple> stack = new Stack<Tuple>();
+		boolean[][] visited = new boolean[bound][bound];
+		
+		visited[origin.x][origin.y] = true;
+
+		world[origin.x][origin.y] = new Cell(origin, origin, destination, 0, forward);	//set as unblocked
+		stack.push(origin);
+		
+		while (true) {	// will break if all cells are visited
+			while (!stack.isEmpty()) {
+				Tuple cur = stack.pop();
+				Tuple next = getUnvisitedNeighbor(cur, visited);
+				if (next != null) {
+					stack.push(cur);
+					visited[next.x][next.y] = true;
+					
+					if ( (origin.x == next.x && origin.y == next.y) || (destination.x == next.x && destination.y == next.y) ) {
+						// ensure that origin and destination are unblocked
+						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), origin, destination, 0, forward);
+					} else {
+						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), origin, destination, (Math.random() < 0.3) ? Integer.MAX_VALUE : 0, forward);
+					}
+					if (world[next.x][next.y].gCost == 0) {	//if unblocked
+						stack.push(next);
+					}
+				}
+				
+			}
+
+			Tuple next = findUnvisitedInWorld(visited);
+			if (next == null) {
+				break;
+			}
+			visited[next.x][next.y] = true;
+			world[next.x][next.y] = new Cell(next, origin, destination, 0, forward);	//set as unblocked
+			stack.push(next);
+			
+		}
+		print(world);
+	}
+
+	private Tuple getUnvisitedNeighbor(Tuple cur, boolean[][] visited) {
+		List<Integer> unvisitedIndex = new ArrayList<Integer>();
+		
+		for (int i = 0; i < 4; i++) {
+			int r = cur.x + direction[i].x;
+			int c = cur.y + direction[i].y;
+
+			if (r >= 0 && r < bound && c >= 0 && c < bound && !visited[r][c]) {
+				unvisitedIndex.add(i);
+			}
+		}
+
+		if (unvisitedIndex.isEmpty()) {
+			return null;
+		}		
+
+		int idx = unvisitedIndex.get((int)(Math.random() * unvisitedIndex.size()));
+		return new Tuple(cur.x + direction[idx].x, cur.y + direction[idx].y);
+		
+	}
+
+	private Tuple findUnvisitedInWorld(boolean[][] visited) {
+		for (int r = 0; r < bound; r++) {
+			for (int c = 0; c < bound; c++) {
+				if (!visited[r][c]) {
+					return new Tuple(r, c);
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public static void main(String[] args) throws InterruptedException {
 		int bound = 101;
-		boolean forward = true;
+		boolean forward = false;
 
 		int numExperiments = 50;
 		if (args.length >= 1) {
@@ -54,7 +130,7 @@ public class World implements Sharable {
 		int numSuccessfulSearches = 0;
 
 		for (int i = 0; i < numExperiments; i++) {
-			World w = new World(bound);
+			World w = new World(bound, forward);
 
 			System.out.println(w.origin);
 			System.out.println(w.destination);
@@ -95,7 +171,7 @@ public class World implements Sharable {
 		double avgRuntimeExperiments = totalRuntime/(numExperiments*1.0);
 		double percentageSuccessfulSearches = (numSuccessfulSearches*1.0)/(numExperiments*1.0);
 
-		System.out.println(numExperiments+" experiments with grid size "+bound);
+		System.out.println(numExperiments+" experiments with grid size "+bound+" running "+ (forward ? "forward" : "backward"));
 		System.out.println("Total runtime: "+totalRuntime);
 		System.out.println("Total nodes generated: "+numTotalNodesGenerated);
 		System.out.println("Total number of searches: "+numSearches);
@@ -119,80 +195,5 @@ public class World implements Sharable {
 			System.out.println();
 		}
 		System.out.println();
-	}
-
-	private void populateWorld() {
-		Stack<Tuple> stack = new Stack<Tuple>();
-		boolean[][] visited = new boolean[bound][bound];
-		
-		visited[origin.x][origin.y] = true;
-
-		world[origin.x][origin.y] = new Cell(origin, origin, destination, 0, true);	//set as unblocked
-		stack.push(origin);
-		
-		while (true) {	// will break if all cells are visited
-			while (!stack.isEmpty()) {
-				Tuple cur = stack.pop();
-				Tuple next = getUnvisitedNeighbor(cur, visited);
-				if (next != null) {
-					stack.push(cur);
-					visited[next.x][next.y] = true;
-					
-					if ( (origin.x == next.x && origin.y == next.y) || (destination.x == next.x && destination.y == next.y) ) {
-						// ensure that origin and destination are unblocked
-						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), origin, destination, 0, true);
-					} else {
-						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), origin, destination, (Math.random() < 0.3) ? Integer.MAX_VALUE : 0, true);
-					}
-					if (world[next.x][next.y].gCost == 0) {	//if unblocked
-						stack.push(next);
-					}
-				}
-				
-			}
-
-			Tuple next = findUnvisitedInWorld(visited);
-			if (next == null) {
-				break;
-			}
-			visited[next.x][next.y] = true;
-			world[next.x][next.y] = new Cell(next, origin, destination, 0, true);	//set as unblocked
-			stack.push(next);
-			
-		}
-		print(world);
-	}
-
-	private Tuple getUnvisitedNeighbor(Tuple cur, boolean[][] visited) {
-		List<Integer> unvisitedIndex = new ArrayList<Integer>();
-		
-		for (int i = 0; i < 4; i++) {
-			int r = cur.x + direction[i].x;
-			int c = cur.y + direction[i].y;
-
-			if (r >= 0 && r < bound && c >= 0 && c < bound && !visited[r][c]) {
-				unvisitedIndex.add(i);
-			}
-		}
-
-		if (unvisitedIndex.isEmpty()) {
-			return null;
-		}		
-
-		int idx = unvisitedIndex.get((int)(Math.random() * unvisitedIndex.size()));
-		return new Tuple(cur.x + direction[idx].x, cur.y + direction[idx].y);
-		
-	}
-
-	private Tuple findUnvisitedInWorld(boolean[][] visited) {
-		for (int r = 0; r < bound; r++) {
-			for (int c = 0; c < bound; c++) {
-				if (!visited[r][c]) {
-					return new Tuple(r, c);
-				}
-			}
-		}
-
-		return null;
 	}
 }

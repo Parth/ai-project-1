@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 
 public class Player {
@@ -48,9 +49,9 @@ public class Player {
 		for (int r = 0; r < bound; r++) {
 			for (int c = 0; c < bound; c++) {
 				if ( this.origin.x == r && this.origin.y == c ) {
-					playerWorld[r][c] = new Cell(new Tuple(r, c), this.origin, this.destination, 0, this.forward);
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.origin, this.destination, this.forward ? 0 : Integer.MAX_VALUE, this.forward);
 				} else if ( this.destination.x == r && this.destination.y == c ) {
-					playerWorld[r][c] = new Cell(new Tuple(r, c), this.origin, this.destination, Integer.MAX_VALUE, this.forward);
+					playerWorld[r][c] = new Cell(new Tuple(r, c), this.origin, this.destination, this.forward ? Integer.MAX_VALUE : 0, this.forward);
 				} else {
 					playerWorld[r][c] = new Cell(new Tuple(r, c), this.origin, this.destination, -1, this.forward);
 				}
@@ -82,18 +83,31 @@ public class Player {
 				Cell pathCell = pathCopy.pop();
 				Cell playerWorldCell = playerWorld[pathCell.location.x][pathCell.location.y];
 
-				if (!playerWorldCell.location.equals(destination) && playerWorldCell.gCost == Integer.MAX_VALUE) {
-					System.out.println("increase in path cost");
-					//one of the cells on the previously computed path is now seen to be blocked.
-					newPath = true;
-					break;
+				if (this.forward) {
+					if (!playerWorldCell.location.equals(destination) && playerWorldCell.gCost == Integer.MAX_VALUE) {
+						System.out.println("increase in path cost");
+						//one of the cells on the previously computed path is now seen to be blocked.
+						newPath = true;
+						break;
+					}
+				} else {
+					if (!playerWorldCell.location.equals(origin) && playerWorldCell.gCost == Integer.MAX_VALUE) {
+						System.out.println("increase in path cost");
+						//one of the cells on the previously computed path is now seen to be blocked.
+						newPath = true;
+						break;
+					}
 				}
+				
 			}
 			
 			if (!newPath) {
 				// if a path was computed, follow it
 				Cell newCell = path.pop();
 				origin = newCell.location;
+
+				// {TODO} have to update the origin's g cost somehow?
+
 				System.out.println("moved to: "+origin);
 				moveHistory.add(newCell.location);
 
@@ -124,23 +138,36 @@ public class Player {
 
 			// create start state
 			Cell startCell = share.getState(origin);
-			startCell.setGCost(0);
+			if(this.forward) {
+				startCell.setGCost(0);
+			} else {
+				startCell.setGCost(Integer.MAX_VALUE);
+			}
 			playerWorld[origin.x][origin.y] = startCell;
 			search[origin.x][origin.y] = counter;
 
 			// create goal state
 			Cell goalCell = share.getState(destination);
-			goalCell.setGCost(Integer.MAX_VALUE);
+			if (this.forward) {
+				goalCell.setGCost(Integer.MAX_VALUE);
+			} else {
+				goalCell.setGCost(0);
+			}
 			playerWorld[destination.x][destination.y] = goalCell;
 			search[destination.x][destination.y] = counter;
 
 			Queue<Cell> open = new PriorityQueue<>();
 			Set<Cell> closed = new HashSet<>();
 
-			open.add(startCell);
+			if(this.forward) {
+				open.add(startCell);
+			} else {
+				open.add(goalCell);
+			}
 			
 			// A* search
-			while (((Cell)this.playerWorld[destination.x][destination.y]).gCost > open.peek().fCost) {
+			Tuple searchEndLocation = this.forward ? destination : origin;
+			while (((Cell)this.playerWorld[searchEndLocation.x][searchEndLocation.y]).gCost > open.peek().fCost) {
 				Cell first = open.poll();
 				
 				// tie-breaking
@@ -210,11 +237,27 @@ public class Player {
 				}
 			}
 
-			path = new Stack<>();
-			Cell iter = this.playerWorld[destination.x][destination.y];
-			while (iter != null) {
-				path.push(iter);
-				iter = iter.searchTreeParent;
+			if (this.forward) {
+				path = new Stack<>();
+				Cell iter = this.playerWorld[destination.x][destination.y];
+				while (iter != null) {
+					path.push(iter);
+					iter = iter.searchTreeParent;
+				}
+			} else {
+				path = new Stack<>();
+				List<Cell> pathList = new ArrayList<>();
+				Cell iter = this.playerWorld[origin.x][origin.y];
+				while (iter != null) {
+					pathList.add(iter);
+					iter = iter.searchTreeParent;
+				}
+
+				//place path list items backwards
+				ListIterator<Cell> listIter = pathList.listIterator(pathList.size());
+				while (listIter.hasPrevious()){
+					path.push(listIter.previous());
+				}
 			}
 
 			Stack<Cell> pathCopy = (Stack<Cell>)path.clone();
@@ -238,7 +281,9 @@ public class Player {
 			if (neighborTuple.x >= 0 && neighborTuple.y >= 0 && neighborTuple.x < bound && neighborTuple.y < bound) {
 				Cell neighborCell = playerWorld[neighborTuple.x][neighborTuple.y];
 				if (neighborCell.gCost == Integer.MAX_VALUE) {
-					if (neighborCell.location.equals(destination)) {
+					if (this.forward && neighborCell.location.equals(destination)) {
+						successors.add(neighborCell);
+					} else if (!this.forward && neighborCell.location.equals(origin)) {
 						successors.add(neighborCell);
 					}
 				} else {
