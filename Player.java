@@ -150,16 +150,14 @@ public class Player {
 					}
 					this.playerWorld[successor.location.x][successor.location.y] = successor;
 				}
-			}
 
-			if (open.size() == 0) {
-				//cant reach target
-				System.out.println("cant reach target");
-				reached = true;
-				return playerWorld;
+				if (open.size() == 0) {
+					//cant reach target
+					System.out.println("cant reach target");
+					reached = true;
+					return playerWorld;
+				}
 			}
-
-			System.out.println("open: "+open.size());
 
 			path = new Stack<>();
 			Cell iter = this.playerWorld[destination.x][destination.y];

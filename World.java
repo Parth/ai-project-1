@@ -64,7 +64,6 @@ public class World implements Sharable {
 
 		while (!p.reached()) {
 			print(p.step());
-			Thread.sleep(500);
 		}
 	}
 
