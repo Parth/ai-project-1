@@ -27,6 +27,7 @@ public class Player {
 
 	// stats
 	public int nodesGenerated;
+	public boolean reachedTarget;
 
 	public Player(Tuple origin, Tuple destination, Sharable share) {
 		this.origin = origin;
@@ -97,6 +98,7 @@ public class Player {
 				// detect if the player reached the destination
 				if (origin.equals(destination)) {
 					reached = true;
+					reachedTarget = true;
 					System.out.println("reached target");
 					System.out.print("move history: ");
 					for (Tuple move : moveHistory) {
@@ -137,17 +139,55 @@ public class Player {
 			
 			// A* search
 			while (((Cell)this.playerWorld[destination.x][destination.y]).gCost > open.peek().fCost) {
-				Cell c = open.poll();
-				closed.add(c);
+				Cell first = open.poll();
+				
+				// tie-breaking
 
-				for (Cell successor : this.A(c, closed)) {
+				List<Cell> tie = new LinkedList<>();
+				while(open.size() >=1 && open.peek().fCost == first.fCost) {
+					tie.add(open.poll());
+				}
+
+				int minGCost = Integer.MAX_VALUE;
+				int maxGCost = Integer.MIN_VALUE;
+				Cell minGCostCell = first;
+				Cell maxGCostCell = first;
+
+				for (Cell t : tie) {
+					if (t.gCost <= minGCost) {
+						minGCost = t.gCost;
+						minGCostCell = t;
+					}
+					if (t.gCost >= maxGCost) {
+						maxGCost = t.gCost;
+						maxGCostCell = t;
+					}
+				}
+
+				for (Cell t : tie) {
+					if (!t.equals(maxGCostCell)) {
+						open.add(t);
+					}
+				}
+
+				// use max g cost
+				//Cell cell = maxGCostCell;
+
+				// use min g cost
+				Cell cell = minGCostCell;
+
+				// end tie-breaking
+
+				closed.add(cell);
+
+				for (Cell successor : this.A(cell, closed)) {
 					if (search(successor.location) < counter) {
 						successor.setGCost(Integer.MAX_VALUE);
 						this.search[successor.location.x][successor.location.y] = counter;
 					}
-					if (successor.gCost > c.gCost + 1) {
-						successor.setGCost(c.gCost + 1);
-						successor.setSearchTreeParent(c);
+					if (successor.gCost > cell.gCost + 1) {
+						successor.setGCost(cell.gCost + 1);
+						successor.setSearchTreeParent(cell);
 						open.remove(successor);
 						open.add(successor);
 					}
@@ -157,6 +197,7 @@ public class Player {
 				if (open.size() == 0) {
 					//cant reach target
 					System.out.println("cant reach target");
+					reachedTarget = false;
 					reached = true;
 					return playerWorld;
 				}

@@ -1,0 +1,51 @@
+Random tie breaking, forward search
+-----------------------------------
+50 experiments with grid size 101
+Average nodes generated per A* search: 604.3067385444743
+Average nodes generated per experiment: 22419.78
+Average runtime per experiment: 24.32 ms
+
+50 experiments with grid size 101
+Average nodes generated per A* search: 519.6302021403092
+Average nodes generated per experiment: 17480.36
+Average runtime per experiment: 16.46 ms
+
+50 experiments with grid size 101
+Average nodes generated per A* search: 617.3873431533005
+Average nodes generated per experiment: 22633.42
+Average runtime per experiment: 17.98 ms
+
+
+Higher g-cost tie breaking forward search
+-----------------------------------------
+50 experiments with grid size 101
+Average nodes generated per A* search: 137.3376753507014
+Average nodes generated per experiment: 2741.26
+Average runtime per experiment: 9.16 ms
+
+50 experiments with grid size 101
+Average nodes generated per A* search: 139.6826835902085
+Average nodes generated per experiment: 3081.4
+Average runtime per experiment: 13.2 ms
+
+50 experiments with grid size 101
+Average nodes generated per A* search: 147.5956873315364
+Average nodes generated per experiment: 3285.48
+Average runtime per experiment: 11.72 ms
+
+Lower g-cost tie breaking forward search
+----------------------------------------
+50 experiments with grid size 101
+Average nodes generated per A* search: 274.4972549019608
+Average nodes generated per experiment: 6999.68
+Average runtime per experiment: 16.26 ms
+
+50 experiments with grid size 101
+Average nodes generated per A* search: 259.34162520729683
+Average nodes generated per experiment: 6255.32
+Average runtime per experiment: 18.76 ms
+
+50 experiments with grid size 101
+Average nodes generated per A* search: 226.83215369059656
+Average nodes generated per experiment: 4486.74
+Average runtime per experiment: 13.4 ms

@@ -49,6 +49,7 @@ public class World implements Sharable {
 		int numSearches = 0;
 		int numTotalNodesGenerated = 0;
 		double totalRuntime = 0.0;
+		int numSuccessfulSearches = 0;
 
 		for (int i = 0; i < numExperiments; i++) {
 			World w = new World(bound);
@@ -76,20 +77,27 @@ public class World implements Sharable {
 			numTotalNodesGenerated += p.nodesGenerated;
 			numSearches += p.counter;
 			System.out.println("nodes generated: "+p.nodesGenerated);
+
+			if (p.reachedTarget) {
+				numSuccessfulSearches++;
+			}
 		}
 		
 		System.out.println();
 		System.out.println("Stats");
 		System.out.println("----------------------");
 
+
 		double avgNodesGeneratedSearch = (numTotalNodesGenerated*1.0)/(numSearches*1.0);
 		double avgNodesGeneratedExperiments = (numTotalNodesGenerated*1.0)/(numExperiments*1.0);
 		double avgRuntimeExperiments = totalRuntime/(numExperiments*1.0);
+		double percentageSuccessfulSearches = (numSuccessfulSearches*1.0)/(numExperiments*1.0);
 
 		System.out.println(numExperiments+" experiments with grid size "+bound);
 		System.out.println("Average nodes generated per A* search: "+avgNodesGeneratedSearch);
 		System.out.println("Average nodes generated per experiment: "+avgNodesGeneratedExperiments);
 		System.out.println("Average runtime per experiment: "+avgRuntimeExperiments+" ms");
+		System.out.println("Percentage of successful searches: "+percentageSuccessfulSearches);
 	}
 
 	public static void print(Cell[][] cells) {
@@ -109,14 +117,13 @@ public class World implements Sharable {
 	}
 
 	private void populateWorld() {
-		Tuple start = Tuple.generateRandomTuple(bound);
 		Stack<Tuple> stack = new Stack<Tuple>();
 		boolean[][] visited = new boolean[bound][bound];
 		
-		visited[start.x][start.y] = true;
+		visited[origin.x][origin.y] = true;
 
-		world[start.x][start.y] = new Cell(start, destination, 0);	//set as unblocked
-		stack.push(start);
+		world[origin.x][origin.y] = new Cell(origin, destination, 0);	//set as unblocked
+		stack.push(origin);
 		
 		while (true) {	// will break if all cells are visited
 			while (!stack.isEmpty()) {
