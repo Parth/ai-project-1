@@ -1,7 +1,10 @@
+import java.util.*;
+
 public class World implements Sharable {
 	
 	private Cell[][] world;
 	private int bound;
+	private static Tuple[] direction = new Tuple[] {new Tuple(-1, 0), new Tuple(1, 0), new Tuple(0, 1), new Tuple(0, -1)};
 
 	public Tuple origin;
 	public Tuple destination;
@@ -17,16 +20,7 @@ public class World implements Sharable {
 
 		this.bound = bound;
 
-		for (int r = 0; r < bound; r++) {
-			for (int c = 0; c < bound; c++) {
-				if ( (origin.x == r && origin.y == c) || (destination.x == r && destination.y == c) ) {
-					// ensure that origin and destination are unblocked
-					world[r][c] = new Cell(new Tuple(r, c), destination, 0);
-				} else {
-					world[r][c] = new Cell(new Tuple(r, c), destination, (Math.random() < 0.3) ? Integer.MAX_VALUE : 0);
-				}
-			}
-		}
+		populateWorld();
 	}
 
 	public Cell[][] getWorld() {
@@ -46,6 +40,12 @@ public class World implements Sharable {
 	public static void main(String[] args) throws InterruptedException {
 		int bound = 101;
 		int numExperiments = 50;
+		if (args.length >= 1) {
+			bound = Integer.parseInt(args[0]);
+		}
+		if (args.length >= 2) {
+			numExperiments = Integer.parseInt(args[1]);
+		}
 		int numSearches = 0;
 		int numTotalNodesGenerated = 0;
 		double totalRuntime = 0.0;
@@ -106,5 +106,81 @@ public class World implements Sharable {
 			System.out.println();
 		}
 		System.out.println();
+	}
+
+	private void populateWorld() {
+		Tuple start = Tuple.generateRandomTuple(bound);
+		Stack<Tuple> stack = new Stack<Tuple>();
+		boolean[][] visited = new boolean[bound][bound];
+		
+		visited[start.x][start.y] = true;
+
+		world[start.x][start.y] = new Cell(start, destination, 0);	//set as unblocked
+		stack.push(start);
+		
+		while (true) {	// will break if all cells are visited
+			while (!stack.isEmpty()) {
+				Tuple cur = stack.pop();
+				Tuple next = getUnvisitedNeighbor(cur, visited);
+				if (next != null) {
+					stack.push(cur);
+					visited[next.x][next.y] = true;
+					
+					if ( (origin.x == next.x && origin.y == next.y) || (destination.x == next.x && destination.y == next.y) ) {
+						// ensure that origin and destination are unblocked
+						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), destination, 0);
+					} else {
+						world[next.x][next.y] = new Cell(new Tuple(next.x, next.y), destination, (Math.random() < 0.3) ? Integer.MAX_VALUE : 0);
+					}
+					if (world[next.x][next.y].gCost == 0) {	//if unblocked
+						stack.push(next);
+					}
+				}
+				
+			}
+
+			Tuple next = findUnvisitedInWorld(visited);
+			if (next == null) {
+				break;
+			}
+			visited[next.x][next.y] = true;
+			world[next.x][next.y] = new Cell(next, destination, 0);	//set as unblocked
+			stack.push(next);
+			
+		}
+		print(world);
+	}
+
+	private Tuple getUnvisitedNeighbor(Tuple cur, boolean[][] visited) {
+		List<Integer> unvisitedIndex = new ArrayList<Integer>();
+		
+		for (int i = 0; i < 4; i++) {
+			int r = cur.x + direction[i].x;
+			int c = cur.y + direction[i].y;
+
+			if (r >= 0 && r < bound && c >= 0 && c < bound && !visited[r][c]) {
+				unvisitedIndex.add(i);
+			}
+		}
+
+		if (unvisitedIndex.isEmpty()) {
+			return null;
+		}		
+
+		int idx = unvisitedIndex.get((int)(Math.random() * unvisitedIndex.size()));
+		return new Tuple(cur.x + direction[idx].x, cur.y + direction[idx].y);
+		
+	}
+
+	private Tuple findUnvisitedInWorld(boolean[][] visited) {
+		for (int r = 0; r < bound; r++) {
+			for (int c = 0; c < bound; c++) {
+				if (!visited[r][c]) {
+					return new Tuple(r, c);
+				}
+			}
+		}
+
+		return null;
 	}
 }
