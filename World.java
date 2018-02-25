@@ -44,27 +44,52 @@ public class World implements Sharable {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		int bound = 0;
-		if (args.length < 1) {
-			bound = 101;
-		} else {
-			bound = Integer.parseInt(args[0]);
+		int bound = 101;
+		int numExperiments = 50;
+		int numSearches = 0;
+		int numTotalNodesGenerated = 0;
+		double totalRuntime = 0.0;
+
+		for (int i = 0; i < numExperiments; i++) {
+			World w = new World(bound);
+
+			System.out.println(w.origin);
+			System.out.println(w.destination);
+
+			print(w.getWorld());
+			
+			Player p = new Player(w.origin, w.destination, w);
+
+			print(p.playerWorld);
+
+			long startTime = System.currentTimeMillis();
+
+			while (!p.reached()) {
+				p.step();
+			}
+
+			long stopTime = System.currentTimeMillis();
+
+			long runtime = stopTime - startTime;
+
+			totalRuntime += runtime;
+			numTotalNodesGenerated += p.nodesGenerated;
+			numSearches += p.counter;
+			System.out.println("nodes generated: "+p.nodesGenerated);
 		}
-
-		World w = new World(bound);
-
-		System.out.println(w.origin);
-		System.out.println(w.destination);
-
-		print(w.getWorld());
 		
-		Player p = new Player(w.origin, w.destination, w);
+		System.out.println();
+		System.out.println("Stats");
+		System.out.println("----------------------");
 
-		print(p.playerWorld);
+		double avgNodesGeneratedSearch = (numTotalNodesGenerated*1.0)/(numSearches*1.0);
+		double avgNodesGeneratedExperiments = (numTotalNodesGenerated*1.0)/(numExperiments*1.0);
+		double avgRuntimeExperiments = totalRuntime/(numExperiments*1.0);
 
-		while (!p.reached()) {
-			print(p.step());
-		}
+		System.out.println(numExperiments+" experiments with grid size "+bound);
+		System.out.println("Average nodes generated per A* search: "+avgNodesGeneratedSearch);
+		System.out.println("Average nodes generated per experiment: "+avgNodesGeneratedExperiments);
+		System.out.println("Average runtime per experiment: "+avgRuntimeExperiments+" ms");
 	}
 
 	public static void print(Cell[][] cells) {

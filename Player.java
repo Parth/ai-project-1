@@ -19,11 +19,14 @@ public class Player {
 
 	private List<Tuple> moveHistory;
 
-	private int counter = 0;
+	public int counter = 0;
 	public int bound;
 	private boolean reached = false;
 
 	private Sharable share;
+
+	// stats
+	public int nodesGenerated;
 
 	public Player(Tuple origin, Tuple destination, Sharable share) {
 		this.origin = origin;
@@ -137,7 +140,7 @@ public class Player {
 				Cell c = open.poll();
 				closed.add(c);
 
-				for (Cell successor : this.A(c)) {
+				for (Cell successor : this.A(c, closed)) {
 					if (search(successor.location) < counter) {
 						successor.setGCost(Integer.MAX_VALUE);
 						this.search[successor.location.x][successor.location.y] = counter;
@@ -179,7 +182,7 @@ public class Player {
 	}
 
 	// return a list of cells that can be traveled to based on available actions at Cell s
-	private List<Cell> A(Cell s) {
+	private List<Cell> A(Cell s, Set<Cell> closed) {
 		List<Cell> successors = new ArrayList<>();
 		Tuple[] d = new Tuple[] {new Tuple(-1, 0), new Tuple(1, 0), new Tuple(0, 1), new Tuple(0, -1)};
 		for (Tuple t : d) {
@@ -191,10 +194,14 @@ public class Player {
 						successors.add(neighborCell);
 					}
 				} else {
-					successors.add(neighborCell);
+					if (!closed.contains(neighborCell)) {
+						successors.add(neighborCell);
+					}
 				}
 			}
 		}
+
+		nodesGenerated += successors.size();
 
 		return successors;
 	}
