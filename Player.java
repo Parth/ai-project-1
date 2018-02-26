@@ -13,6 +13,7 @@ public class Player {
 	private Tuple origin;
 	private Tuple destination;
 	private boolean forward;
+	private boolean adaptive;
 
 	private int[][] search;
 	public Cell[][] playerWorld;
@@ -29,13 +30,15 @@ public class Player {
 
 	// stats
 	public int nodesGenerated;
+	public int nodesExpanded;
 	public boolean reachedTarget;
 
-	public Player(Tuple origin, Tuple destination, Sharable share, boolean forward) {
+	public Player(Tuple origin, Tuple destination, Sharable share, boolean forward, boolean adaptive) {
 		this.origin = origin;
 		this.destination = destination;
 		this.share = share;
 		this.forward = forward;
+		this.adaptive = adaptive;
 
 		bound = share.getBounds();
 
@@ -106,8 +109,6 @@ public class Player {
 				Cell newCell = path.pop();
 				origin = newCell.location;
 
-				// {TODO} have to update the origin's g cost somehow?
-
 				System.out.println("moved to: "+origin);
 				moveHistory.add(newCell.location);
 
@@ -143,6 +144,12 @@ public class Player {
 			} else {
 				startCell.setGCost(Integer.MAX_VALUE);
 			}
+
+			if (adaptive) {
+				Cell startCellPlayer = playerWorld[origin.x][origin.y];
+				startCell.setHCost(startCellPlayer.hCost);
+			}
+
 			playerWorld[origin.x][origin.y] = startCell;
 			search[origin.x][origin.y] = counter;
 
@@ -153,6 +160,12 @@ public class Player {
 			} else {
 				goalCell.setGCost(0);
 			}
+
+			if (adaptive) {
+				Cell goalCellPlayer = playerWorld[destination.x][destination.y];
+				goalCell.setHCost(goalCellPlayer.hCost);
+			}
+
 			playerWorld[destination.x][destination.y] = goalCell;
 			search[destination.x][destination.y] = counter;
 
@@ -213,6 +226,7 @@ public class Player {
 				// end tie-breaking
 
 				closed.add(cell);
+				nodesExpanded++;
 
 				for (Cell successor : this.A(cell, closed)) {
 					if (search(successor.location) < counter) {
@@ -224,6 +238,7 @@ public class Player {
 						successor.setSearchTreeParent(cell);
 						open.remove(successor);
 						open.add(successor);
+						nodesGenerated++;
 					}
 					this.playerWorld[successor.location.x][successor.location.y] = successor;
 				}
@@ -234,6 +249,16 @@ public class Player {
 					reachedTarget = false;
 					reached = true;
 					return playerWorld;
+				}
+			}
+			
+			if (adaptive) {
+				Cell goalState = playerWorld[destination.x][destination.y];
+
+				// update hCost values for adaptive A* search
+				for (Cell c : closed) {
+					c.setHCost(goalState.gCost - c.gCost);
+					playerWorld[c.location.x][c.location.y] = c;
 				}
 			}
 
@@ -293,9 +318,6 @@ public class Player {
 				}
 			}
 		}
-
-		nodesGenerated += successors.size();
-
 		return successors;
 	}
 

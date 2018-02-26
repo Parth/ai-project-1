@@ -29,6 +29,12 @@ public class Cell implements Comparable<Cell> {
 		this.fCost = hCost + gCost;
 	}
 
+	//only used for adaptive A* search
+	public void setHCost(int hCost) {
+		this.hCost = hCost;
+		this.fCost = hCost + gCost;
+	}
+
 	public String toString() {
 		if (gCost == -1) {
 			return "U";

@@ -115,7 +115,13 @@ public class World implements Sharable {
 
 	public static void main(String[] args) throws InterruptedException {
 		int bound = 101;
-		boolean forward = false;
+		boolean forward = true; // set to true for forward search, false for backward search
+		boolean adaptive = true; // set to true for adaptive A* search
+
+		if (!forward) {
+			//adaptive search must be forward
+			adaptive = false;
+		}
 
 		int numExperiments = 50;
 		if (args.length >= 1) {
@@ -128,6 +134,7 @@ public class World implements Sharable {
 		int numTotalNodesGenerated = 0;
 		double totalRuntime = 0.0;
 		int numSuccessfulSearches = 0;
+		int numTotalNodesExpanded = 0;
 
 		for (int i = 0; i < numExperiments; i++) {
 			World w = new World(bound, forward);
@@ -137,7 +144,7 @@ public class World implements Sharable {
 
 			print(w.getWorld());
 			
-			Player p = new Player(w.origin, w.destination, w, forward);
+			Player p = new Player(w.origin, w.destination, w, forward, adaptive);
 
 			print(p.playerWorld);
 
@@ -153,6 +160,7 @@ public class World implements Sharable {
 
 			totalRuntime += runtime;
 			numTotalNodesGenerated += p.nodesGenerated;
+			numTotalNodesExpanded += p.nodesExpanded;
 			numSearches += p.counter;
 			System.out.println("nodes generated: "+p.nodesGenerated);
 
@@ -165,18 +173,20 @@ public class World implements Sharable {
 		System.out.println("Stats");
 		System.out.println("----------------------");
 
-
+		double avgNodesExpandedSearch = (numTotalNodesExpanded*1.0)/(numSearches*1.0);
 		double avgNodesGeneratedSearch = (numTotalNodesGenerated*1.0)/(numSearches*1.0);
 		double avgNodesGeneratedExperiments = (numTotalNodesGenerated*1.0)/(numExperiments*1.0);
 		double avgRuntimeExperiments = totalRuntime/(numExperiments*1.0);
 		double percentageSuccessfulSearches = (numSuccessfulSearches*1.0)/(numExperiments*1.0);
 
-		System.out.println(numExperiments+" experiments with grid size "+bound+" running "+ (forward ? "forward" : "backward"));
+		System.out.println(numExperiments+" experiments with grid size "+bound+" running "+ (forward ? "forward" : "backward")+" "+(adaptive ? "adaptive" : ""));
 		System.out.println("Total runtime: "+totalRuntime);
 		System.out.println("Total nodes generated: "+numTotalNodesGenerated);
+		System.out.println("Total nodes expanded: "+numTotalNodesExpanded);
 		System.out.println("Total number of searches: "+numSearches);
 		System.out.println("Average nodes generated per experiment: "+avgNodesGeneratedExperiments);
 		System.out.println("Average nodes generated per A* search: "+avgNodesGeneratedSearch);
+		System.out.println("Average nodes expanded per A* search: "+avgNodesExpandedSearch);
 		System.out.println("Average runtime per experiment: "+avgRuntimeExperiments+" ms");
 		System.out.println("Percentage of successful searches: "+percentageSuccessfulSearches);
 	}
