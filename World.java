@@ -23,6 +23,29 @@ public class World implements Sharable {
 		populateWorld(forward);
 	}
 
+	public World(int bound, Cell[][] world, Tuple origin, Tuple destination) {
+		this.bound = bound;
+		this.world = world;
+		this.origin = origin;
+		this.destination = destination;
+	}
+
+	public World worldCopy(boolean forward) {
+		Cell[][] newWorld = new Cell[this.bound][this.bound];
+		Tuple newOrigin = new Tuple(this.origin.x, this.origin.y);
+		Tuple newDestination = new Tuple(this.destination.x, this.destination.y);
+		for (int r = 0; r < this.bound; r++) {
+			for (int c = 0; c < newWorld[r].length; c++) {
+				Cell oldCell = world[r][c];
+				Cell newCell = new Cell(new Tuple(r, c), newOrigin, newDestination, oldCell.gCost, forward);
+
+				newWorld[r][c] = newCell;
+			}
+		}
+
+		return new World(this.bound, newWorld, newOrigin, newDestination);
+	}
+
 	public Cell[][] getWorld() {
 		return world;
 	}
@@ -136,6 +159,12 @@ public class World implements Sharable {
 		int numSuccessfulSearches = 0;
 		int numTotalNodesExpanded = 0;
 
+		int numSearchesA = 0;
+		int numTotalNodesGeneratedA = 0;
+		double totalRuntimeA = 0.0;
+		int numSuccessfulSearchesA = 0;
+		int numTotalNodesExpandedA = 0;
+
 		for (int i = 0; i < numExperiments; i++) {
 			World w = new World(bound, forward);
 
@@ -144,19 +173,28 @@ public class World implements Sharable {
 
 			print(w.getWorld());
 			
-			Player p = new Player(w.origin, w.destination, w, forward, adaptive);
+			Player p = new Player(w.origin, w.destination, w, forward, false);
+
+			World worldCopy = w.worldCopy(forward);
+			Player pA = new Player(worldCopy.origin, worldCopy.destination, worldCopy, forward, true);
 
 			print(p.playerWorld);
 
 			long startTime = System.currentTimeMillis();
-
 			while (!p.reached()) {
 				p.step();
 			}
-
 			long stopTime = System.currentTimeMillis();
-
 			long runtime = stopTime - startTime;
+
+			long startTimeA = System.currentTimeMillis();
+			if (adaptive) {
+				while (!pA.reached()) {
+					pA.step();
+				}
+			}
+			long stopTimeA = System.currentTimeMillis();
+			long runtimeA = stopTimeA - startTimeA;
 
 			totalRuntime += runtime;
 			numTotalNodesGenerated += p.nodesGenerated;
@@ -164,8 +202,16 @@ public class World implements Sharable {
 			numSearches += p.counter;
 			System.out.println("nodes generated: "+p.nodesGenerated);
 
+			totalRuntimeA += runtimeA;
+			numTotalNodesGeneratedA += pA.nodesGenerated;
+			numTotalNodesExpandedA += pA.nodesExpanded;
+			numSearchesA += pA.counter;
+
 			if (p.reachedTarget) {
 				numSuccessfulSearches++;
+			}
+			if (pA.reachedTarget) {
+				numSuccessfulSearchesA++;
 			}
 		}
 		
@@ -189,6 +235,30 @@ public class World implements Sharable {
 		System.out.println("Average nodes expanded per A* search: "+avgNodesExpandedSearch);
 		System.out.println("Average runtime per experiment: "+avgRuntimeExperiments+" ms");
 		System.out.println("Percentage of successful searches: "+percentageSuccessfulSearches);
+
+		System.out.println();
+
+		if (adaptive) {
+			System.out.println("Adaptive search");
+			System.out.println("-----------------------");
+			double avgNodesExpandedSearchA = (numTotalNodesExpandedA*1.0)/(numSearchesA*1.0);
+			double avgNodesGeneratedSearchA = (numTotalNodesGeneratedA*1.0)/(numSearchesA*1.0);
+			double avgNodesGeneratedExperimentsA = (numTotalNodesGeneratedA*1.0)/(numExperiments*1.0);
+			double avgRuntimeExperimentsA = totalRuntimeA/(numExperiments*1.0);
+			double percentageSuccessfulSearchesA = (numSuccessfulSearchesA*1.0)/(numExperiments*1.0);
+
+			System.out.println(numExperiments+" experiments with grid size "+bound+" running "+ (forward ? "forward" : "backward")+" "+(adaptive ? "adaptive" : ""));
+			System.out.println("Total runtime: "+totalRuntimeA);
+			System.out.println("Total nodes generated: "+numTotalNodesGeneratedA);
+			System.out.println("Total nodes expanded: "+numTotalNodesExpandedA);
+			System.out.println("Total number of searches: "+numSearchesA);
+			System.out.println("Average nodes generated per experiment: "+avgNodesGeneratedExperimentsA);
+			System.out.println("Average nodes generated per A* search: "+avgNodesGeneratedSearchA);
+			System.out.println("Average nodes expanded per A* search: "+avgNodesExpandedSearchA);
+			System.out.println("Average runtime per experiment: "+avgRuntimeExperimentsA+" ms");
+			System.out.println("Percentage of successful searches: "+percentageSuccessfulSearchesA);
+		}
+	
 	}
 
 	public static void print(Cell[][] cells) {

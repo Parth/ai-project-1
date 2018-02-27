@@ -95,47 +95,29 @@ Percentage of successful searches: 0.92
 
 adpative
 --------
+Stats
+----------------------
 50 experiments with grid size 101 running forward adaptive
-Total runtime: 691.0
-Total nodes generated: 200431
-Total nodes expanded: 76021
-Total number of searches: 1776
-Average nodes generated per experiment: 4008.62
-Average nodes generated per A* search: 112.8552927927928
-Average nodes expanded per A* search: 42.80461711711712
-Average runtime per experiment: 13.82 ms
-Percentage of successful searches: 1.0
+Total runtime: 1041.0
+Total nodes generated: 238656
+Total nodes expanded: 113115
+Total number of searches: 1851
+Average nodes generated per experiment: 4773.12
+Average nodes generated per A* search: 128.93354943273906
+Average nodes expanded per A* search: 61.11021069692058
+Average runtime per experiment: 20.82 ms
+Percentage of successful searches: 0.92
 
+Adaptive search
+-----------------------
 50 experiments with grid size 101 running forward adaptive
-Total runtime: 702.0
-Total nodes generated: 190610
-Total nodes expanded: 78580
-Total number of searches: 1646
-Average nodes generated per experiment: 3812.2
-Average nodes generated per A* search: 115.80194410692589
-Average nodes expanded per A* search: 47.73997569866343
-Average runtime per experiment: 14.04 ms
-Percentage of successful searches: 0.96
-
-50 experiments with grid size 101 running forward adaptive
-Total runtime: 693.0
-Total nodes generated: 191034
-Total nodes expanded: 78737
-Total number of searches: 1611
-Average nodes generated per experiment: 3820.68
-Average nodes generated per A* search: 118.58100558659218
-Average nodes expanded per A* search: 48.874612042209804
-Average runtime per experiment: 13.86 ms
-Percentage of successful searches: 0.94
-
-50 experiments with grid size 101 running forward adaptive
-Total runtime: 690.0
-Total nodes generated: 208074
-Total nodes expanded: 86118
-Total number of searches: 1762
-Average nodes generated per experiment: 4161.48
-Average nodes generated per A* search: 118.08967082860386
-Average nodes expanded per A* search: 48.87514188422247
-Average runtime per experiment: 13.8 ms
-Percentage of successful searches: 0.98
+Total runtime: 896.0
+Total nodes generated: 231640
+Total nodes expanded: 107369
+Total number of searches: 1836
+Average nodes generated per experiment: 4632.8
+Average nodes generated per A* search: 126.16557734204792
+Average nodes expanded per A* search: 58.479847494553375
+Average runtime per experiment: 17.92 ms
+Percentage of successful searches: 0.92
 

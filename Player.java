@@ -145,7 +145,7 @@ public class Player {
 				startCell.setGCost(Integer.MAX_VALUE);
 			}
 
-			if (adaptive) {
+			if (this.adaptive) {
 				Cell startCellPlayer = playerWorld[origin.x][origin.y];
 				startCell.setHCost(startCellPlayer.hCost);
 			}
@@ -161,7 +161,7 @@ public class Player {
 				goalCell.setGCost(0);
 			}
 
-			if (adaptive) {
+			if (this.adaptive) {
 				Cell goalCellPlayer = playerWorld[destination.x][destination.y];
 				goalCell.setHCost(goalCellPlayer.hCost);
 			}
@@ -252,13 +252,13 @@ public class Player {
 				}
 			}
 			
-			if (adaptive) {
-				Cell goalState = playerWorld[destination.x][destination.y];
+			if (this.adaptive) {
+				Cell sbar = open.poll();
 
 				// update hCost values for adaptive A* search
 				for (Cell c : closed) {
-					c.setHCost(goalState.gCost - c.gCost);
-					playerWorld[c.location.x][c.location.y] = c;
+					c.setHCost(sbar.fCost - c.gCost);
+					this.playerWorld[c.location.x][c.location.y] = c;
 				}
 			}
 
@@ -304,7 +304,7 @@ public class Player {
 		for (Tuple t : d) {
 			Tuple neighborTuple = new Tuple(s.location.x + t.x, s.location.y + t.y);
 			if (neighborTuple.x >= 0 && neighborTuple.y >= 0 && neighborTuple.x < bound && neighborTuple.y < bound) {
-				Cell neighborCell = playerWorld[neighborTuple.x][neighborTuple.y];
+				Cell neighborCell = this.playerWorld[neighborTuple.x][neighborTuple.y];
 				if (neighborCell.gCost == Integer.MAX_VALUE) {
 					if (this.forward && neighborCell.location.equals(destination)) {
 						successors.add(neighborCell);

@@ -20,6 +20,14 @@ public class Cell implements Comparable<Cell> {
 		searchTreeParent = null;
 	}
 
+	public Cell(Tuple location, Cell searchTreeParent, int fCost, int gCost, int hCost) {
+		this.location = location;
+		this.searchTreeParent = searchTreeParent;
+		this.fCost = fCost;
+		this.gCost = gCost;
+		this.hCost = hCost;
+	}
+
 	public void setSearchTreeParent(Cell c) {
 		searchTreeParent = c;
 	}
